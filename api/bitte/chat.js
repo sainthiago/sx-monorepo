@@ -15,13 +15,64 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
+  console.log('🟡 Request received:', {
+    method: req.method,
+    headers: req.headers,
+    url: req.url
+  });
+
   // Forward the request to Bitte API
-  return fetch(`${BITTE_API_URL}/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': req.headers['content-type'] || 'application/json',
-      Authorization: `Bearer ${BITTE_API_KEY}`
-    },
-    body: req.body
+  return new Promise(async resolve => {
+    try {
+      console.log('🟡 Making request to Bitte API:', {
+        url: `${BITTE_API_URL}/chat`,
+        hasApiKey: !!BITTE_API_KEY,
+        body: req.body
+      });
+
+      const response = await fetch(`${BITTE_API_URL}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${BITTE_API_KEY}`
+        },
+        body: req.body
+      });
+
+      console.log('🟢 Bitte API response:', {
+        status: response.status,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      // Copy status and headers
+      res.status(response.status);
+      for (const [key, value] of Object.entries(response.headers)) {
+        res.setHeader(key, value);
+      }
+
+      // Send the response
+      const text = await response.text();
+      console.log('🟢 Bitte API response body:', text);
+
+      try {
+        const data = JSON.parse(text);
+        console.log('🟢 Parsed JSON response:', data);
+        res.json(data);
+      } catch (parseError) {
+        console.error('🔴 Failed to parse JSON:', parseError);
+        res.status(500).json({
+          error: 'Invalid JSON response',
+          raw: `${text.substring(0, 200)}...`
+        });
+      }
+      resolve();
+    } catch (error) {
+      console.error('🔴 Request error:', error);
+      res.status(500).json({
+        error: 'Internal Server Error',
+        details: error.message
+      });
+      resolve();
+    }
   });
 }
