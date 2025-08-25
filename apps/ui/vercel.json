@@ -1,6 +1,7 @@
 {
-  "buildCommand": "yarn build",
+  "buildCommand": "cd ../../ && yarn workspace @snapshot-labs/sx run build && cd apps/ui && yarn build",
   "outputDirectory": "dist",
   "devCommand": "yarn dev",
-  "installCommand": "yarn install"
+  "installCommand": "cd ../../ && yarn install --frozen-lockfile",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
 }

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn install --frozen-lockfile && cd packages/sx.js && yarn build && cd ../../apps/ui && yarn build",
+  "buildCommand": "yarn build",
   "outputDirectory": "apps/ui/dist",
   "devCommand": "cd apps/ui && yarn dev",
   "installCommand": "yarn install --frozen-lockfile",
