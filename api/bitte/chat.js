@@ -39,14 +39,28 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Bitte API error response:', errorText);
-      throw new Error(
-        `Bitte API responded with status: ${response.status} - ${errorText}`
-      );
+      return res.status(response.status).json({
+        error: 'Bitte API error',
+        status: response.status,
+        details: errorText
+      });
     }
 
-    const data = await response.json();
-    console.log('Bitte API success, returning data');
-    res.json(data);
+    const responseText = await response.text();
+    console.log('Raw Bitte API response:', responseText);
+
+    try {
+      const data = JSON.parse(responseText);
+      console.log('Bitte API success, returning data');
+      res.json(data);
+    } catch (parseError) {
+      console.error('Failed to parse Bitte API response as JSON:', parseError);
+      console.error('Raw response:', responseText);
+      return res.status(500).json({
+        error: 'Invalid JSON response from Bitte API',
+        details: `${responseText.substring(0, 200)}...`
+      });
+    }
   } catch (error) {
     console.error('Error calling Bitte API:', error.message);
     res.status(500).json({
