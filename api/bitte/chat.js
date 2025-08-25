@@ -20,7 +20,6 @@ export default async function handler(req, res) {
       'Content-Type': req.headers['content-type'] || 'application/json',
       Authorization: `Bearer ${BITTE_API_KEY}`
     },
-    body: req.body,
-    duplex: 'half'
+    body: req.body
   });
 }
