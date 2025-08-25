@@ -34,7 +34,8 @@ export default function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${BITTE_API_KEY}`
+          Authorization: `Bearer ${BITTE_API_KEY}`,
+          Accept: 'text/event-stream'
         },
         body: req.body
       });
@@ -44,27 +45,33 @@ export default function handler(req, res) {
         headers: Object.fromEntries(response.headers.entries())
       });
 
-      // Copy status and headers
-      res.status(response.status);
-      for (const [key, value] of Object.entries(response.headers)) {
-        res.setHeader(key, value);
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('🔴 API Error:', error);
+        res.status(response.status).json({ error });
+        return;
       }
 
-      // Send the response
-      const text = await response.text();
-      console.log('🟢 Bitte API response body:', text);
+      // Set streaming headers
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
-      try {
-        const data = JSON.parse(text);
-        console.log('🟢 Parsed JSON response:', data);
-        res.json(data);
-      } catch (parseError) {
-        console.error('🔴 Failed to parse JSON:', parseError);
-        res.status(500).json({
-          error: 'Invalid JSON response',
-          raw: `${text.substring(0, 200)}...`
-        });
+      // Stream the response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        console.log('🟢 Streaming chunk:', chunk);
+        res.write(chunk);
       }
+
+      console.log('🟢 Stream complete');
+      res.end();
       resolve();
     } catch (error) {
       console.error('🔴 Request error:', error);
