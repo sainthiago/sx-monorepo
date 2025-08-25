@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const response = await fetch(`${BITTE_API_URL}/chat`, {
+  return fetch(`${BITTE_API_URL}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': req.headers['content-type'] || 'application/json',
@@ -23,7 +23,4 @@ export default async function handler(req, res) {
     body: req.body,
     duplex: 'half'
   });
-
-  const data = await response.json();
-  res.json(data);
 }
