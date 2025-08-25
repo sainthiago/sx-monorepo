@@ -22,27 +22,7 @@ export default defineConfig({
   base: ELECTRON ? path.resolve(__dirname, './dist') : undefined,
   server: {
     host: '127.0.0.1',
-    proxy: {
-      '/api/bitte/chat': {
-        target: 'https://ai-runtime-446257178793.europe-west1.run.app',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api\/bitte/, ''),
-        configure: proxy => {
-          proxy.on('proxyReq', (proxyReq, req) => {
-            // Add authentication header
-            const bitteApiKey = process.env.BITTE_API_KEY;
-            if (bitteApiKey) {
-              proxyReq.setHeader('Authorization', `Bearer ${bitteApiKey}`);
-            }
-
-            // Ensure content-type is set for POST requests
-            if (req.method === 'POST') {
-              proxyReq.setHeader('Content-Type', 'application/json');
-            }
-          });
-        }
-      }
-    }
+    proxy: {}
   },
   define: {
     'process.env': process.env
