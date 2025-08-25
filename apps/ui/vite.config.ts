@@ -23,7 +23,7 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     proxy: {
-      '/apps/ui/api/bitte/chat': {
+      '/api/bitte/chat': {
         target: 'https://ai-runtime-446257178793.europe-west1.run.app',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api\/bitte/, ''),
