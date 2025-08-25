@@ -4,6 +4,7 @@ import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
 import router from '@/routes';
 import '@/style.scss';
+import '@bitte-ai/chat/styles.css';
 
 const knownHosts = [
   'app.safe.global',

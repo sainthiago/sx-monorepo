@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BitteChatWidget from '@/components/BitteChatWidget.vue';
 import { HELPDESK_URL } from '@/helpers/constants';
 
 const { isWhiteLabel, resolved } = useWhiteLabel();
@@ -36,5 +37,19 @@ const isSiteRoute = computed(() => {
         </a>
       </UiTooltip>
     </div>
+  </div>
+  <!-- Chat Widget Modal -->
+  <div>
+    <BitteChatWidget
+      agent-id="bitte-assistant"
+      :widget-welcome-prompts="{
+        questions: [
+          'What are the latest proposals?',
+          'How do I create a proposal?',
+          'Explain voting power calculation'
+        ],
+        actions: ['Create Proposal', 'Vote', 'Delegate Power']
+      }"
+    />
   </div>
 </template>

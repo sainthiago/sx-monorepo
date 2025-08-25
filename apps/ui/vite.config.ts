@@ -1,6 +1,7 @@
 import path from 'path';
 import inject from '@rollup/plugin-inject';
 import vue from '@vitejs/plugin-vue';
+import * as dotenv from 'dotenv';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
@@ -8,6 +9,9 @@ import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
@@ -17,7 +21,42 @@ const target = ['esnext'];
 export default defineConfig({
   base: ELECTRON ? path.resolve(__dirname, './dist') : undefined,
   server: {
-    host: '127.0.0.1'
+    host: '127.0.0.1',
+    proxy: {
+      '/api/bitte/chat': {
+        target: 'https://ai-runtime-446257178793.europe-west1.run.app',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/bitte/, ''),
+        configure: proxy => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            // Add authentication header
+            const bitteApiKey = process.env.BITTE_API_KEY;
+            if (bitteApiKey) {
+              proxyReq.setHeader('Authorization', `Bearer ${bitteApiKey}`);
+            }
+
+            // Ensure content-type is set for POST requests
+            if (req.method === 'POST') {
+              proxyReq.setHeader('Content-Type', 'application/json');
+            }
+          });
+        }
+      },
+      '/api/bitte/history': {
+        target: 'https://ai-runtime-446257178793.europe-west1.run.app',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/bitte/, ''),
+        configure: proxy => {
+          proxy.on('proxyReq', proxyReq => {
+            // Add authentication header
+            const bitteApiKey = process.env.BITTE_API_KEY;
+            if (bitteApiKey) {
+              proxyReq.setHeader('Authorization', `Bearer ${bitteApiKey}`);
+            }
+          });
+        }
+      }
+    }
   },
   define: {
     'process.env': process.env
