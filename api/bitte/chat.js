@@ -24,12 +24,6 @@ export default async function handler(req, res) {
     duplex: 'half'
   });
 
-  // Copy status and headers
-  res.status(response.status);
-  for (const [key, value] of response.headers) {
-    res.setHeader(key, value);
-  }
-
-  // Stream the response
-  response.body.pipe(res);
+  const data = await response.json();
+  res.json(data);
 }
