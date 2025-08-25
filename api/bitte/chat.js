@@ -1,6 +1,6 @@
 const {
   BITTE_API_KEY,
-  BITTE_API_URL = 'https://ai-runtime-446257178793.europe-west1.run.app/chat'
+  BITTE_API_URL = 'https://ai-runtime-446257178793.europe-west1.run.app'
 } = process.env;
 
 export default async function handler(req, res) {
@@ -24,5 +24,12 @@ export default async function handler(req, res) {
     duplex: 'half'
   });
 
-  return response;
+  // Copy status and headers
+  res.status(response.status);
+  for (const [key, value] of response.headers) {
+    res.setHeader(key, value);
+  }
+
+  // Stream the response
+  response.body.pipe(res);
 }
