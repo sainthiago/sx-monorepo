@@ -87,7 +87,6 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['@snapshot-labs/sx'],
     esbuildOptions: {
       target
     }

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn install --frozen-lockfile && yarn workspace @snapshot-labs/sx build && yarn workspace ui build",
+  "buildCommand": "yarn install --frozen-lockfile && npx turbo run build --filter=ui",
   "outputDirectory": "apps/ui/dist",
   "devCommand": "cd apps/ui && yarn dev",
   "installCommand": "yarn install --frozen-lockfile",
