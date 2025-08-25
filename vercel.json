@@ -1,7 +1,6 @@
 {
   "buildCommand": "yarn build",
-  "outputDirectory": "apps/ui/dist",
-  "devCommand": "cd apps/ui && yarn dev",
-  "installCommand": "yarn install --frozen-lockfile",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./apps/ui/"
+  "outputDirectory": "dist",
+  "devCommand": "yarn dev",
+  "installCommand": "yarn install"
 }

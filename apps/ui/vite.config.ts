@@ -87,7 +87,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    include: ['@snapshot-labs/sx'],
+    exclude: ['@snapshot-labs/sx'],
     esbuildOptions: {
       target
     }
@@ -108,10 +108,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@snapshot-labs/sx': path.resolve(
-        __dirname,
-        '../../packages/sx.js/dist/index.js'
-      ),
       '@': path.resolve(__dirname, './src'),
       // polyfills
       stream: path.resolve('../../node_modules/stream-browserify'),
