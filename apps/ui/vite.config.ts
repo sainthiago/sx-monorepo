@@ -41,20 +41,6 @@ export default defineConfig({
             }
           });
         }
-      },
-      '/api/bitte/history': {
-        target: 'https://ai-runtime-446257178793.europe-west1.run.app',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api\/bitte/, ''),
-        configure: proxy => {
-          proxy.on('proxyReq', proxyReq => {
-            // Add authentication header
-            const bitteApiKey = process.env.BITTE_API_KEY;
-            if (bitteApiKey) {
-              proxyReq.setHeader('Authorization', `Bearer ${bitteApiKey}`);
-            }
-          });
-        }
       }
     }
   },
