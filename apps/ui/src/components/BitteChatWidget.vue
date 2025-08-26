@@ -57,6 +57,33 @@ function renderBitteWidget() {
               throw error;
             }
           },
+          signTypedData: async (typedData: any) => {
+            try {
+              const provider = auth.value?.provider;
+              if (!provider) throw new Error('No provider available');
+
+              // Get signer the same way the project does it
+              const signer = provider.getSigner();
+
+              // Parse typed data if it's a string
+              const parsedTypedData =
+                typeof typedData === 'string'
+                  ? JSON.parse(typedData)
+                  : typedData;
+
+              // Sign typed data using ethers.js format
+              const signature = await signer._signTypedData(
+                parsedTypedData.domain,
+                parsedTypedData.types,
+                parsedTypedData.message
+              );
+
+              return signature;
+            } catch (error) {
+              console.error('Typed data signing failed:', error);
+              throw error;
+            }
+          },
           switchChain: async (chainId: number | any) => {
             try {
               const provider = auth.value?.provider;
