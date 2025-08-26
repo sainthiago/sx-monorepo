@@ -70,109 +70,93 @@ function renderBitteWidget() {
   });
 
   // Create wagmi-like adapter for this project's wallet system
-  let walletConfig;
-  try {
-    console.log('🔍 Creating wallet config...');
-    walletConfig = auth.value
-      ? {
-          evm: {
-            address: auth.value.account,
-            chainId: auth.value.provider?.network?.chainId,
-            hash: currentHash,
-            signature: currentSignature,
-            sendTransaction: async (transaction: any) => {
-              const provider = auth.value?.provider;
-              if (!provider) throw new Error('No provider available');
+  const walletConfig = auth.value
+    ? {
+        evm: {
+          address: auth.value.account,
+          chainId: auth.value.provider?.network?.chainId,
+          hash: currentHash,
+          signature: currentSignature,
+          sendTransaction: async (transaction: any) => {
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              const signer = provider.getSigner();
-              const tx = await signer.sendTransaction(transaction);
-              const receipt = await tx.wait();
+            const signer = provider.getSigner();
+            const tx = await signer.sendTransaction(transaction);
+            const receipt = await tx.wait();
 
-              currentHash = receipt.transactionHash || tx.hash;
-              console.log('🟢 Transaction success:', { hash: currentHash });
-              console.log('🔍 Updated currentHash state:', currentHash);
-              return { hash: currentHash };
-            },
-            signMessage: async (message: string) => {
-              const provider = auth.value?.provider;
-              if (!provider) throw new Error('No provider available');
+            currentHash = receipt.transactionHash || tx.hash;
+            console.log('🟢 Transaction success:', { hash: currentHash });
+            console.log('🔍 Updated currentHash state:', currentHash);
+            return { hash: currentHash };
+          },
+          signMessage: async (message: string) => {
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              const signer = provider.getSigner();
-              const signature = await signer.signMessage(message);
+            const signer = provider.getSigner();
+            const signature = await signer.signMessage(message);
 
-              currentSignature = signature;
-              console.log('🟢 Message signature:', {
-                signature: currentSignature
-              });
-              console.log(
-                '🔍 Updated currentSignature state:',
-                currentSignature
-              );
-              return signature;
-            },
-            signTypedData: async (typedData: any) => {
-              const provider = auth.value?.provider;
-              if (!provider) throw new Error('No provider available');
+            currentSignature = signature;
+            console.log('🟢 Message signature:', {
+              signature: currentSignature
+            });
+            console.log('🔍 Updated currentSignature state:', currentSignature);
+            return signature;
+          },
+          signTypedData: async (typedData: any) => {
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              const signer = provider.getSigner();
-              const parsedTypedData =
-                typeof typedData === 'string'
-                  ? JSON.parse(typedData)
-                  : typedData;
+            const signer = provider.getSigner();
+            const parsedTypedData =
+              typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
 
-              const cleanTypes = { ...parsedTypedData.types };
-              delete cleanTypes.EIP712Domain;
+            const cleanTypes = { ...parsedTypedData.types };
+            delete cleanTypes.EIP712Domain;
 
-              const signature = await signer._signTypedData(
-                parsedTypedData.domain,
-                cleanTypes,
-                parsedTypedData.message
-              );
+            const signature = await signer._signTypedData(
+              parsedTypedData.domain,
+              cleanTypes,
+              parsedTypedData.message
+            );
 
-              currentSignature = signature;
-              console.log('🟢 Typed data signature:', {
-                signature: currentSignature
-              });
-              console.log(
-                '🔍 Updated currentSignature state:',
-                currentSignature
-              );
-              console.log(
-                '🔍 Wallet config signature property:',
-                currentSignature
-              );
-              return signature;
-            },
-            switchChain: async (chainId: number | any) => {
-              const provider = auth.value?.provider;
-              if (!provider?.provider?.request) {
-                throw new Error('No provider available');
-              }
-
-              const actualChainId =
-                typeof chainId === 'object' && chainId?.id
-                  ? chainId.id
-                  : typeof chainId === 'number'
-                    ? chainId
-                    : parseInt(chainId);
-
-              const encodedChainId = `0x${actualChainId.toString(16)}`;
-              await provider.provider.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: encodedChainId }]
-              });
-
-              console.log('🟢 Chain switch success');
-              return true;
+            currentSignature = signature;
+            console.log('🟢 Typed data signature:', {
+              signature: currentSignature
+            });
+            console.log('🔍 Updated currentSignature state:', currentSignature);
+            console.log(
+              '🔍 Wallet config signature property:',
+              currentSignature
+            );
+            return signature;
+          },
+          switchChain: async (chainId: number | any) => {
+            const provider = auth.value?.provider;
+            if (!provider?.provider?.request) {
+              throw new Error('No provider available');
             }
+
+            const actualChainId =
+              typeof chainId === 'object' && chainId?.id
+                ? chainId.id
+                : typeof chainId === 'number'
+                  ? chainId
+                  : parseInt(chainId);
+
+            const encodedChainId = `0x${actualChainId.toString(16)}`;
+            await provider.provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: encodedChainId }]
+            });
+
+            console.log('🟢 Chain switch success');
+            return true;
           }
         }
-      : undefined;
-    console.log('🔍 Wallet config created successfully');
-  } catch (error) {
-    console.error('🔴 Error creating wallet config:', error);
-    walletConfig = undefined;
-  }
+      }
+    : undefined;
 
   // Log final wallet config being passed to Bitte
   console.log('🔍 Final wallet config passed to Bitte:', {
