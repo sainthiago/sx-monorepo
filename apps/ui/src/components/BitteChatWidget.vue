@@ -14,7 +14,9 @@ let currentHash: string | undefined;
 let currentSignature: string | undefined;
 
 onMounted(async () => {
+  console.log('🔍 Component mounted');
   try {
+    console.log('🔍 Loading React and Bitte AI Chat...');
     // Dynamically import React and Bitte AI Chat
     const [reactModule, reactDOMModule, chatModule] = await Promise.all([
       import('react'),
@@ -26,8 +28,14 @@ onMounted(async () => {
     ReactDOM = reactDOMModule;
     BitteWidgetChat = chatModule.BitteWidgetChat;
 
+    console.log('🔍 Modules loaded successfully');
+    console.log('🔍 chatContainer.value:', !!chatContainer.value);
+
     if (chatContainer.value) {
+      console.log('🔍 Calling renderBitteWidget...');
       renderBitteWidget();
+    } else {
+      console.log('🔴 chatContainer.value is null');
     }
   } catch (error) {
     console.error('Failed to load Bitte AI Chat:', error);
@@ -35,7 +43,23 @@ onMounted(async () => {
 });
 
 function renderBitteWidget() {
-  if (!React || !ReactDOM || !BitteWidgetChat || !chatContainer.value) return;
+  console.log('🔍 renderBitteWidget called');
+  console.log('🔍 React components loaded:', {
+    React: !!React,
+    ReactDOM: !!ReactDOM,
+    BitteWidgetChat: !!BitteWidgetChat,
+    chatContainer: !!chatContainer.value
+  });
+
+  if (!React || !ReactDOM || !BitteWidgetChat || !chatContainer.value) {
+    console.log('🔴 Early exit - missing components:', {
+      React: !!React,
+      ReactDOM: !!ReactDOM,
+      BitteWidgetChat: !!BitteWidgetChat,
+      chatContainer: !!chatContainer.value
+    });
+    return;
+  }
 
   // Log current wallet state
   console.log('🔍 Wallet state before render:', {
