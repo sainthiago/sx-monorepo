@@ -3,6 +3,8 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 const chatContainer = ref<HTMLDivElement>();
 const { auth } = useWeb3();
+const actions = useActions();
+const uiStore = useUiStore();
 
 // Track React components
 let React: any = null;
@@ -77,7 +79,7 @@ function renderBitteWidget() {
     return;
   }
 
-  // Create wagmi-like adapter for this project's wallet system
+  // Create wagmi-like adapter using the same patterns as useActions
   const walletConfig = auth.value
     ? {
         evm: {
@@ -86,81 +88,107 @@ function renderBitteWidget() {
           hash: currentHash,
           signature: currentSignature,
           sendTransaction: async (transaction: any) => {
-            const provider = auth.value?.provider;
-            if (!provider) throw new Error('No provider available');
-
-            const signer = provider.getSigner();
-            const tx = await signer.sendTransaction(transaction);
-            const receipt = await tx.wait();
-
-            currentHash = receipt.transactionHash || tx.hash;
-            console.log('🟢 Transaction success:', { hash: currentHash });
-            console.log('🔍 Updated currentHash state:', currentHash);
-            return { hash: currentHash };
-          },
-          signMessage: async (message: string) => {
-            const provider = auth.value?.provider;
-            if (!provider) throw new Error('No provider available');
-
-            const signer = provider.getSigner();
-            const signature = await signer.signMessage(message);
-
-            currentSignature = signature;
-            console.log('🟢 Message signature:', {
-              signature: currentSignature
-            });
-            console.log('🔍 Updated currentSignature state:', currentSignature);
-            return signature;
-          },
-          signTypedData: async (typedData: any) => {
-            const provider = auth.value?.provider;
-            if (!provider) throw new Error('No provider available');
-
-            const signer = provider.getSigner();
-            const parsedTypedData =
-              typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
-
-            const cleanTypes = { ...parsedTypedData.types };
-            delete cleanTypes.EIP712Domain;
-
-            const signature = await signer._signTypedData(
-              parsedTypedData.domain,
-              cleanTypes,
-              parsedTypedData.message
-            );
-
-            currentSignature = signature;
-            console.log('🟢 Typed data signature:', {
-              signature: currentSignature
-            });
-            console.log('🔍 Updated currentSignature state:', currentSignature);
-            console.log(
-              '🔍 Wallet config signature property:',
-              currentSignature
-            );
-            return signature;
-          },
-          switchChain: async (chainId: number | any) => {
-            const provider = auth.value?.provider;
-            if (!provider?.provider?.request) {
+            if (!auth.value?.provider) {
               throw new Error('No provider available');
             }
 
-            const actualChainId =
-              typeof chainId === 'object' && chainId?.id
-                ? chainId.id
-                : typeof chainId === 'number'
-                  ? chainId
-                  : parseInt(chainId);
+            try {
+              const signer = auth.value.provider.getSigner();
+              console.log('🔍 Sending transaction:', transaction);
+              
+              const tx = await signer.sendTransaction(transaction);
+              console.log('🔍 Transaction sent:', tx);
+              
+              const receipt = await tx.wait();
+              console.log('🔍 Transaction receipt:', receipt);
 
-            const encodedChainId = `0x${actualChainId.toString(16)}`;
-            await provider.provider.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: encodedChainId }]
-            });
+              currentHash = receipt.transactionHash || tx.hash;
+              console.log('🟢 Transaction success:', { hash: currentHash });
+              
+              return { hash: currentHash };
+            } catch (error) {
+              console.error('🔴 Transaction failed:', error);
+              // Use the same error handling pattern as useActions
+              throw error;
+            }
+          },
+          signMessage: async (message: string) => {
+            if (!auth.value?.provider) {
+              throw new Error('No provider available');
+            }
 
-            console.log('🟢 Chain switch success');
-            return true;
+            try {
+              const signer = auth.value.provider.getSigner();
+              console.log('🔍 Signing message:', message);
+              
+              const signature = await signer.signMessage(message);
+              
+              currentSignature = signature;
+              console.log('🟢 Message signature:', { signature: currentSignature });
+              
+              return signature;
+            } catch (error) {
+              console.error('🔴 Message signing failed:', error);
+              throw error;
+            }
+          },
+          signTypedData: async (typedData: any) => {
+            if (!auth.value?.provider) {
+              throw new Error('No provider available');
+            }
+
+            try {
+              const signer = auth.value.provider.getSigner();
+              const parsedTypedData =
+                typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
+
+              console.log('🔍 Signing typed data:', parsedTypedData);
+
+              const cleanTypes = { ...parsedTypedData.types };
+              delete cleanTypes.EIP712Domain;
+
+              const signature = await signer._signTypedData(
+                parsedTypedData.domain,
+                cleanTypes,
+                parsedTypedData.message
+              );
+
+              currentSignature = signature;
+              console.log('🟢 Typed data signature:', { signature: currentSignature });
+              
+              return signature;
+            } catch (error) {
+              console.error('🔴 Typed data signing failed:', error);
+              throw error;
+            }
+          },
+          switchChain: async (chainId: number | any) => {
+            if (!auth.value?.provider?.provider?.request) {
+              throw new Error('No provider available');
+            }
+
+            try {
+              const actualChainId =
+                typeof chainId === 'object' && chainId?.id
+                  ? chainId.id
+                  : typeof chainId === 'number'
+                    ? chainId
+                    : parseInt(chainId);
+
+              const encodedChainId = `0x${actualChainId.toString(16)}`;
+              console.log('🔍 Switching to chain:', { chainId: actualChainId, encoded: encodedChainId });
+              
+              await auth.value.provider.provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: encodedChainId }]
+              });
+
+              console.log('🟢 Chain switch success');
+              return true;
+            } catch (error) {
+              console.error('🔴 Chain switch failed:', error);
+              throw error;
+            }
           }
         }
       }
