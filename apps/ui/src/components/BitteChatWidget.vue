@@ -38,16 +38,12 @@ const walletConfig = computed(() => {
         try {
           // Use the same getSigner pattern as the rest of the project
           const signer = auth.value.provider.getSigner();
-          console.log('🔍 Sending transaction:', transaction);
 
           const tx = await signer.sendTransaction(transaction);
-          console.log('🔍 Transaction sent:', tx);
 
           const receipt = await tx.wait();
-          console.log('🔍 Transaction receipt:', receipt);
 
           currentHash.value = receipt.transactionHash || tx.hash;
-          console.log('🟢 Transaction success:', { hash: currentHash.value });
 
           // Add success notification using the same pattern as useActions
           if (currentHash.value) {
@@ -77,16 +73,12 @@ const walletConfig = computed(() => {
         try {
           // Use the same getSigner pattern as the rest of the project
           const signer = auth.value.provider.getSigner();
-          console.log('🔍 Signing message:', message);
 
           const signature = await signer.signMessage(message);
 
           currentSignature.value = signature
             ? parseSignature(signature as `0x${string}`)
             : undefined;
-          console.log('🟢 Message signature:', {
-            signature: currentSignature.value
-          });
 
           return signature;
         } catch (error) {
@@ -110,8 +102,6 @@ const walletConfig = computed(() => {
           const parsedTypedData =
             typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
 
-          console.log('🔍 Signing typed data:', parsedTypedData);
-
           const cleanTypes = { ...parsedTypedData.types };
           delete cleanTypes.EIP712Domain;
 
@@ -120,13 +110,6 @@ const walletConfig = computed(() => {
             cleanTypes,
             parsedTypedData.message
           );
-
-          console.log('🟢 Raw typed data signature:', {
-            signature,
-            signatureLength: signature.length,
-            signatureType: typeof signature,
-            startsWithHex: signature.startsWith('0x')
-          });
 
           // Ensure signature starts with 0x
           let normalizedSignature = signature;
@@ -141,8 +124,6 @@ const walletConfig = computed(() => {
               : undefined;
 
             currentSignature.value = parsedSig;
-
-            console.log('🟢 Returning signature as string to Bitte widget');
 
             // Return just the signature string - let the widget handle parsing
             return;
@@ -179,17 +160,12 @@ const walletConfig = computed(() => {
                 : parseInt(chainId);
 
           const encodedChainId = `0x${actualChainId.toString(16)}`;
-          console.log('🔍 Switching to chain:', {
-            chainId: actualChainId,
-            encoded: encodedChainId
-          });
 
           await auth.value.provider.provider.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: encodedChainId }]
           });
 
-          console.log('🟢 Chain switch success');
           return true;
         } catch (error) {
           console.error('🔴 Chain switch failed:', error);
@@ -206,9 +182,7 @@ const walletConfig = computed(() => {
 });
 
 onMounted(async () => {
-  console.log('🔍 Component mounted');
   try {
-    console.log('🔍 Loading React and Bitte AI Chat...');
     // Dynamically import React and Bitte AI Chat
     const [reactModule, reactDOMModule, chatModule] = await Promise.all([
       import('react'),
@@ -220,11 +194,7 @@ onMounted(async () => {
     ReactDOM = reactDOMModule;
     BitteWidgetChat = chatModule.BitteWidgetChat;
 
-    console.log('🔍 Modules loaded successfully');
-    console.log('🔍 chatContainer.value:', !!chatContainer.value);
-
     if (chatContainer.value) {
-      console.log('🔍 Calling initializeBitteWidget...');
       initializeBitteWidget();
     } else {
       console.log('🔴 chatContainer.value is null');
@@ -235,14 +205,6 @@ onMounted(async () => {
 });
 
 function initializeBitteWidget() {
-  console.log('🔍 initializeBitteWidget called');
-  console.log('🔍 React components loaded:', {
-    React: !!React,
-    ReactDOM: !!ReactDOM,
-    BitteWidgetChat: !!BitteWidgetChat,
-    chatContainer: !!chatContainer.value
-  });
-
   if (
     !React ||
     !ReactDOM ||
@@ -250,13 +212,6 @@ function initializeBitteWidget() {
     !chatContainer.value ||
     reactRoot
   ) {
-    console.log('🔴 Early exit - missing components or already initialized:', {
-      React: !!React,
-      ReactDOM: !!ReactDOM,
-      BitteWidgetChat: !!BitteWidgetChat,
-      chatContainer: !!chatContainer.value,
-      reactRoot: !!reactRoot
-    });
     return;
   }
 
@@ -272,30 +227,6 @@ function renderBitteWidget() {
     console.log('🔴 Cannot render - missing React root or components');
     return;
   }
-
-  // Debug: Check auth state at function start
-  console.log('🔍 Auth state at render:', {
-    authExists: !!auth.value,
-    account: auth.value?.account,
-    provider: !!auth.value?.provider,
-    chainId: auth.value?.provider?.network?.chainId
-  });
-
-  // Log current wallet state
-  console.log('🔍 Wallet state at render:', {
-    currentHash: currentHash.value,
-    currentSignature: currentSignature.value,
-    address: auth.value?.account,
-    chainId: auth.value?.provider?.network?.chainId
-  });
-
-  // Log final wallet config being passed to Bitte
-  console.log('🔍 Final wallet config passed to Bitte:', {
-    walletConfig: walletConfig.value,
-    evmConfig: walletConfig.value?.evm,
-    hash: walletConfig.value?.evm?.hash,
-    signature: walletConfig.value?.evm?.signature
-  });
 
   // Create React element with current props
   const chatElement = React.createElement(BitteWidgetChat, {
@@ -332,7 +263,6 @@ watch(
   () => auth.value,
   () => {
     if (reactRoot && React && BitteWidgetChat) {
-      console.log('🔍 Auth changed, updating widget props');
       renderBitteWidget();
     }
   },
@@ -342,17 +272,12 @@ watch(
 // Watch for signature/hash changes and re-render widget
 watch([currentHash, currentSignature], () => {
   if (reactRoot && React && BitteWidgetChat) {
-    console.log('🔍 Wallet data changed, updating widget props:', {
-      hash: currentHash.value,
-      signature: currentSignature.value
-    });
     renderBitteWidget();
   }
 });
 
 onUnmounted(() => {
   if (reactRoot && reactRoot.unmount) {
-    console.log('🔍 Unmounting React component');
     reactRoot.unmount();
     reactRoot = null;
   }
