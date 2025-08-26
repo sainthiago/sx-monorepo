@@ -1,4 +1,6 @@
-module.exports = async function handler(req, res) {
+import { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,4 +37,4 @@ module.exports = async function handler(req, res) {
     console.error('Error:', error);
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
-};
+}

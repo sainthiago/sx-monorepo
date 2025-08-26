@@ -71,7 +71,7 @@ function renderBitteWidget() {
   // Create React element with proper props structure
   const chatElement = React.createElement(BitteWidgetChat, {
     agentId: 'snapshot-agent-theta.vercel.app',
-    apiUrl: '/api/chat',
+    apiUrl: '/api/chat.mjs',
     format: 'markdown',
     wallet: walletConfig,
     options: { agentName: 'Snapshot DAO Agent' },
