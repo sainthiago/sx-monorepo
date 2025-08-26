@@ -51,6 +51,22 @@ function renderBitteWidget() {
     chatContainer: !!chatContainer.value
   });
 
+  // Debug: Check auth state at function start
+  console.log('🔍 Auth state at function start:', {
+    authExists: !!auth.value,
+    account: auth.value?.account,
+    provider: !!auth.value?.provider,
+    chainId: auth.value?.provider?.network?.chainId
+  });
+
+  // Log current wallet state (before early return check)
+  console.log('🔍 Wallet state before render:', {
+    currentHash,
+    currentSignature,
+    address: auth.value?.account,
+    chainId: auth.value?.provider?.network?.chainId
+  });
+
   if (!React || !ReactDOM || !BitteWidgetChat || !chatContainer.value) {
     console.log('🔴 Early exit - missing components:', {
       React: !!React,
@@ -60,14 +76,6 @@ function renderBitteWidget() {
     });
     return;
   }
-
-  // Log current wallet state
-  console.log('🔍 Wallet state before render:', {
-    currentHash,
-    currentSignature,
-    address: auth.value?.account,
-    chainId: auth.value?.provider?.network?.chainId
-  });
 
   // Create wagmi-like adapter for this project's wallet system
   const walletConfig = auth.value
@@ -158,7 +166,7 @@ function renderBitteWidget() {
       }
     : undefined;
 
-  // Log final wallet config being passed to Bitte
+  // Log final wallet config being passed to Bitte (moved to ensure it executes)
   console.log('🔍 Final wallet config passed to Bitte:', {
     walletConfig,
     evmConfig: walletConfig?.evm,
