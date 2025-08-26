@@ -155,34 +155,9 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLabel
+              <UiLink
                 :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
-              />
-            </AppLink>
-            <AppLink
-              v-if="
-                proposal.executions?.length ||
-                proposal.execution_strategy_type === 'safeSnap'
-              "
-              :to="{
-                name: 'space-proposal-execution',
-                params: {
-                  proposal: proposal.proposal_id,
-                  space: `${proposal.network}:${proposal.space.id}`
-                }
-              }"
-              class="flex items-center"
-            >
-              <UiLabel
-                :is-active="route.name === 'space-proposal-execution'"
-                :count="
-                  proposal.executions
-                    .map(execution => execution.transactions.length)
-                    .reduce((a, b) => a + b, 0)
-                "
-                text="Execution"
-                class="inline-block"
               />
             </AppLink>
             <AppLink
@@ -195,7 +170,7 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLabel
+              <UiLink
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
@@ -214,7 +189,7 @@ watchEffect(() => {
                 }"
                 class="flex items-center"
               >
-                <UiLabel
+                <UiLink
                   :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
@@ -237,11 +212,7 @@ watchEffect(() => {
                 class="flex items-center"
                 target="_blank"
               >
-                <UiLabel
-                  :count="boostCount"
-                  text="Boost"
-                  class="inline-block"
-                />
+                <UiLink :count="boostCount" text="Boost" class="inline-block" />
               </a>
             </template>
           </div>

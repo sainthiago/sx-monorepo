@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
 
 const chatContainer = ref<HTMLDivElement>();
 const { auth } = useWeb3();
@@ -105,10 +106,20 @@ function renderBitteWidget() {
               currentHash = receipt.transactionHash || tx.hash;
               console.log('🟢 Transaction success:', { hash: currentHash });
               
+              // Add success notification like useActions does
+              if (currentHash) {
+                uiStore.addNotification('success', 'Transaction completed successfully');
+              }
+              
               return { hash: currentHash };
             } catch (error) {
               console.error('🔴 Transaction failed:', error);
+              
               // Use the same error handling pattern as useActions
+              if (!isUserAbortError(error)) {
+                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+              }
+              
               throw error;
             }
           },
@@ -129,6 +140,11 @@ function renderBitteWidget() {
               return signature;
             } catch (error) {
               console.error('🔴 Message signing failed:', error);
+              
+              if (!isUserAbortError(error)) {
+                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+              }
+              
               throw error;
             }
           },
@@ -159,6 +175,11 @@ function renderBitteWidget() {
               return signature;
             } catch (error) {
               console.error('🔴 Typed data signing failed:', error);
+              
+              if (!isUserAbortError(error)) {
+                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+              }
+              
               throw error;
             }
           },
@@ -187,6 +208,11 @@ function renderBitteWidget() {
               return true;
             } catch (error) {
               console.error('🔴 Chain switch failed:', error);
+              
+              if (!isUserAbortError(error)) {
+                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+              }
+              
               throw error;
             }
           }
