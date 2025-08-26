@@ -51,9 +51,19 @@ function renderBitteWidget() {
 
               // Wait for the transaction to be mined and return the hash
               const receipt = await tx.wait();
-              return receipt.transactionHash || tx.hash;
-            } catch (error) {
+              const txHash = receipt.transactionHash || tx.hash;
+              console.log('🟢 Transaction success:', { txHash });
+              return txHash;
+            } catch (error: any) {
               console.error('Transaction failed:', error);
+              console.log('🟡 Transaction result:', { success: false, error });
+              // Check if user rejected the transaction
+              if (
+                error?.code === 4001 ||
+                error?.message?.includes('rejected')
+              ) {
+                throw new Error('Transaction rejected by user');
+              }
               throw error;
             }
           },
@@ -82,9 +92,18 @@ function renderBitteWidget() {
                 parsedTypedData.message
               );
 
+              console.log('🟢 Signature success:', { signature });
               return signature;
-            } catch (error) {
+            } catch (error: any) {
               console.error('Typed data signing failed:', error);
+              console.log('🟡 Signature result:', { success: false, error });
+              // Check if user rejected the signature request
+              if (
+                error?.code === 4001 ||
+                error?.message?.includes('rejected')
+              ) {
+                throw new Error('Signature rejected by user');
+              }
               throw error;
             }
           },
@@ -109,8 +128,19 @@ function renderBitteWidget() {
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: encodedChainId }]
               });
-            } catch (error) {
+
+              console.log('🟢 Chain switch success');
+              return true; // Return success indicator
+            } catch (error: any) {
               console.error('Chain switch failed:', error);
+              console.log('🟡 Chain switch result:', { success: false, error });
+              // Check if user rejected the chain switch
+              if (
+                error?.code === 4001 ||
+                error?.message?.includes('rejected')
+              ) {
+                throw new Error('Chain switch rejected by user');
+              }
               throw error;
             }
           }
