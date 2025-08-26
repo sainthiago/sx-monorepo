@@ -37,6 +37,14 @@ onMounted(async () => {
 function renderBitteWidget() {
   if (!React || !ReactDOM || !BitteWidgetChat || !chatContainer.value) return;
 
+  // Log current wallet state
+  console.log('🔍 Wallet state before render:', {
+    currentHash,
+    currentSignature,
+    address: auth.value?.account,
+    chainId: auth.value?.provider?.network?.chainId
+  });
+
   // Create wagmi-like adapter for this project's wallet system
   const walletConfig = auth.value
     ? {
@@ -55,6 +63,7 @@ function renderBitteWidget() {
 
             currentHash = receipt.transactionHash || tx.hash;
             console.log('🟢 Transaction success:', { hash: currentHash });
+            console.log('🔍 Updated currentHash state:', currentHash);
             return { hash: currentHash };
           },
           signMessage: async (message: string) => {
@@ -68,6 +77,7 @@ function renderBitteWidget() {
             console.log('🟢 Message signature:', {
               signature: currentSignature
             });
+            console.log('🔍 Updated currentSignature state:', currentSignature);
             return signature;
           },
           signTypedData: async (typedData: any) => {
@@ -91,7 +101,11 @@ function renderBitteWidget() {
             console.log('🟢 Typed data signature:', {
               signature: currentSignature
             });
-            console.log('🟢 Current wallet signature state:', currentSignature);
+            console.log('🔍 Updated currentSignature state:', currentSignature);
+            console.log(
+              '🔍 Wallet config signature property:',
+              currentSignature
+            );
             return signature;
           },
           switchChain: async (chainId: number | any) => {
@@ -119,6 +133,14 @@ function renderBitteWidget() {
         }
       }
     : undefined;
+
+  // Log final wallet config being passed to Bitte
+  console.log('🔍 Final wallet config passed to Bitte:', {
+    walletConfig,
+    evmConfig: walletConfig?.evm,
+    hash: walletConfig?.evm?.hash,
+    signature: walletConfig?.evm?.signature
+  });
 
   // Create React element with proper props structure
   const chatElement = React.createElement(BitteWidgetChat, {
