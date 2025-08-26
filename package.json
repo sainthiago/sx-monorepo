@@ -45,5 +45,6 @@
       "**/@graphprotocol/graph-ts",
       "**/assemblyscript"
     ]
-  }
+  },
+  "dependencies": {}
 }
