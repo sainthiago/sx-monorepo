@@ -30,13 +30,14 @@ export default async function handler(req) {
       body: JSON.stringify(body)
     });
 
-    // Forward the response
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
+    // Forward the streaming response directly
+    return new Response(response.body, {
       status: response.status,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Content-Type': response.headers.get('content-type') || 'text/plain',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive'
       }
     });
   } catch (error) {
