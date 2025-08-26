@@ -9,6 +9,10 @@ let React: any = null;
 let ReactDOM: any = null;
 let BitteWidgetChat: any = null;
 
+// State to track wallet data
+let currentHash: string | undefined;
+let currentSignature: string | undefined;
+
 onMounted(async () => {
   try {
     // Dynamically import React and Bitte AI Chat
@@ -33,116 +37,84 @@ onMounted(async () => {
 function renderBitteWidget() {
   if (!React || !ReactDOM || !BitteWidgetChat || !chatContainer.value) return;
 
-  // Prepare wallet configuration
+  // Create wagmi-like adapter for this project's wallet system
   const walletConfig = auth.value
     ? {
         evm: {
           address: auth.value.account,
+          chainId: auth.value.provider?.network?.chainId,
+          hash: currentHash,
+          signature: currentSignature,
           sendTransaction: async (transaction: any) => {
-            try {
-              const provider = auth.value?.provider;
-              if (!provider) throw new Error('No provider available');
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              // Get signer the same way the project does it
-              const signer = provider.getSigner();
+            const signer = provider.getSigner();
+            const tx = await signer.sendTransaction(transaction);
+            const receipt = await tx.wait();
 
-              // Send transaction using the signer
-              const tx = await signer.sendTransaction(transaction);
+            currentHash = receipt.transactionHash || tx.hash;
+            console.log('🟢 Transaction success:', { hash: currentHash });
+            return { hash: currentHash };
+          },
+          signMessage: async (message: string) => {
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              // Wait for the transaction to be mined and return the hash
-              const receipt = await tx.wait();
-              const txHash = receipt.transactionHash || tx.hash;
-              console.log('🟢 Transaction success:', { txHash });
-              return txHash;
-            } catch (error: any) {
-              console.error('Transaction failed:', error);
-              console.log('🟡 Transaction result:', { success: false, error });
-              // Check if user rejected the transaction
-              if (
-                error?.code === 4001 ||
-                error?.message?.includes('rejected')
-              ) {
-                throw new Error('Transaction rejected by user');
-              }
-              throw error;
-            }
+            const signer = provider.getSigner();
+            const signature = await signer.signMessage(message);
+
+            currentSignature = signature;
+            console.log('🟢 Message signature:', {
+              signature: currentSignature
+            });
+            return signature;
           },
           signTypedData: async (typedData: any) => {
-            try {
-              const provider = auth.value?.provider;
-              if (!provider) throw new Error('No provider available');
+            const provider = auth.value?.provider;
+            if (!provider) throw new Error('No provider available');
 
-              // Get signer the same way the project does it
-              const signer = provider.getSigner();
+            const signer = provider.getSigner();
+            const parsedTypedData =
+              typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
 
-              // Parse typed data if it's a string
-              const parsedTypedData =
-                typeof typedData === 'string'
-                  ? JSON.parse(typedData)
-                  : typedData;
+            const cleanTypes = { ...parsedTypedData.types };
+            delete cleanTypes.EIP712Domain;
 
-              // Remove EIP712Domain from types as ethers.js handles it separately
-              const cleanTypes = { ...parsedTypedData.types };
-              delete cleanTypes.EIP712Domain;
+            const signature = await signer._signTypedData(
+              parsedTypedData.domain,
+              cleanTypes,
+              parsedTypedData.message
+            );
 
-              // Sign typed data using ethers.js format
-              const signature = await signer._signTypedData(
-                parsedTypedData.domain,
-                cleanTypes,
-                parsedTypedData.message
-              );
-
-              console.log('🟢 Signature success:', { signature });
-              return signature;
-            } catch (error: any) {
-              console.error('Typed data signing failed:', error);
-              console.log('🟡 Signature result:', { success: false, error });
-              // Check if user rejected the signature request
-              if (
-                error?.code === 4001 ||
-                error?.message?.includes('rejected')
-              ) {
-                throw new Error('Signature rejected by user');
-              }
-              throw error;
-            }
+            currentSignature = signature;
+            console.log('🟢 Typed data signature:', {
+              signature: currentSignature
+            });
+            console.log('🟢 Current wallet signature state:', currentSignature);
+            return signature;
           },
           switchChain: async (chainId: number | any) => {
-            try {
-              const provider = auth.value?.provider;
-              if (!provider?.provider?.request) {
-                throw new Error('No provider available');
-              }
-
-              // Extract the actual chain ID number if it's an object
-              const actualChainId =
-                typeof chainId === 'object' && chainId?.id
-                  ? chainId.id
-                  : typeof chainId === 'number'
-                    ? chainId
-                    : parseInt(chainId);
-
-              // Use the same pattern as the project for chain switching
-              const encodedChainId = `0x${actualChainId.toString(16)}`;
-              await provider.provider.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: encodedChainId }]
-              });
-
-              console.log('🟢 Chain switch success');
-              return true; // Return success indicator
-            } catch (error: any) {
-              console.error('Chain switch failed:', error);
-              console.log('🟡 Chain switch result:', { success: false, error });
-              // Check if user rejected the chain switch
-              if (
-                error?.code === 4001 ||
-                error?.message?.includes('rejected')
-              ) {
-                throw new Error('Chain switch rejected by user');
-              }
-              throw error;
+            const provider = auth.value?.provider;
+            if (!provider?.provider?.request) {
+              throw new Error('No provider available');
             }
+
+            const actualChainId =
+              typeof chainId === 'object' && chainId?.id
+                ? chainId.id
+                : typeof chainId === 'number'
+                  ? chainId
+                  : parseInt(chainId);
+
+            const encodedChainId = `0x${actualChainId.toString(16)}`;
+            await provider.provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: encodedChainId }]
+            });
+
+            console.log('🟢 Chain switch success');
+            return true;
           }
         }
       }
