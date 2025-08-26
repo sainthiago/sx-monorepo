@@ -42,9 +42,16 @@ function renderBitteWidget() {
             try {
               const provider = auth.value?.provider;
               if (!provider) throw new Error('No provider available');
+
+              // Get signer the same way the project does it
               const signer = provider.getSigner();
+
+              // Send transaction using the signer
               const tx = await signer.sendTransaction(transaction);
-              return tx.hash;
+
+              // Wait for the transaction to be mined and return the hash
+              const receipt = await tx.wait();
+              return receipt.transactionHash || tx.hash;
             } catch (error) {
               console.error('Transaction failed:', error);
               throw error;
@@ -52,13 +59,17 @@ function renderBitteWidget() {
           },
           switchChain: async (chainId: number) => {
             try {
-              const ethereum = (window as any).ethereum;
-              if (ethereum && ethereum.request) {
-                await ethereum.request({
-                  method: 'wallet_switchEthereumChain',
-                  params: [{ chainId: `0x${chainId.toString(16)}` }]
-                });
+              const provider = auth.value?.provider;
+              if (!provider?.provider?.request) {
+                throw new Error('No provider available');
               }
+
+              // Use the same pattern as the project for chain switching
+              const encodedChainId = `0x${chainId.toString(16)}`;
+              await provider.provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: encodedChainId }]
+              });
             } catch (error) {
               console.error('Chain switch failed:', error);
               throw error;
