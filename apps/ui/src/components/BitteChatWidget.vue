@@ -57,15 +57,23 @@ function renderBitteWidget() {
               throw error;
             }
           },
-          switchChain: async (chainId: number) => {
+          switchChain: async (chainId: number | any) => {
             try {
               const provider = auth.value?.provider;
               if (!provider?.provider?.request) {
                 throw new Error('No provider available');
               }
 
+              // Extract the actual chain ID number if it's an object
+              const actualChainId =
+                typeof chainId === 'object' && chainId?.id
+                  ? chainId.id
+                  : typeof chainId === 'number'
+                    ? chainId
+                    : parseInt(chainId);
+
               // Use the same pattern as the project for chain switching
-              const encodedChainId = `0x${chainId.toString(16)}`;
+              const encodedChainId = `0x${actualChainId.toString(16)}`;
               await provider.provider.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: encodedChainId }]
