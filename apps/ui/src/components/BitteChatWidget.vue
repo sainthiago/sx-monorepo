@@ -71,10 +71,14 @@ function renderBitteWidget() {
                   ? JSON.parse(typedData)
                   : typedData;
 
+              // Remove EIP712Domain from types as ethers.js handles it separately
+              const cleanTypes = { ...parsedTypedData.types };
+              delete cleanTypes.EIP712Domain;
+
               // Sign typed data using ethers.js format
               const signature = await signer._signTypedData(
                 parsedTypedData.domain,
-                parsedTypedData.types,
+                cleanTypes,
                 parsedTypedData.message
               );
 
