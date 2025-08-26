@@ -81,11 +81,15 @@ function renderBitteWidget() {
       },
       widgetWelcomePrompts: {
         questions: [
-          'What is the latest activity?',
-          'Show me trending proposals',
-          'Help me understand voting power'
+          'Do I have any open proposals?',
+          'Show the latest proposals for cow.eth',
+          'Search for uniswap spaces'
         ],
-        actions: ['Create Proposal', 'Vote', 'Delegate']
+        actions: [
+          'Vote yes on x proposal',
+          'Do I have voting power on X proposal',
+          'what can I do here?'
+        ]
       }
     }
   });
