@@ -18,7 +18,7 @@ export default async function handler(req) {
   try {
     const BITTE_API_KEY = process.env.BITTE_API_KEY;
     const BITTE_API_URL =
-      'https://ai-runtime-markdown-446257178793.europe-west1.run.app';
+      'https://ai-runtime-446257178793.europe-west1.run.app';
 
     const body = await req.json();
     const response = await fetch(`${BITTE_API_URL}/chat`, {
