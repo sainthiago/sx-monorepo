@@ -4,7 +4,6 @@ import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
 
 const chatContainer = ref<HTMLDivElement>();
 const { auth } = useWeb3();
-const actions = useActions();
 const uiStore = useUiStore();
 
 // Track React components
@@ -94,32 +93,39 @@ function renderBitteWidget() {
             }
 
             try {
+              // Use the same getSigner pattern as the rest of the project
               const signer = auth.value.provider.getSigner();
               console.log('🔍 Sending transaction:', transaction);
-              
+
               const tx = await signer.sendTransaction(transaction);
               console.log('🔍 Transaction sent:', tx);
-              
+
               const receipt = await tx.wait();
               console.log('🔍 Transaction receipt:', receipt);
 
               currentHash = receipt.transactionHash || tx.hash;
               console.log('🟢 Transaction success:', { hash: currentHash });
-              
-              // Add success notification like useActions does
+
+              // Add success notification using the same pattern as useActions
               if (currentHash) {
-                uiStore.addNotification('success', 'Transaction completed successfully');
+                uiStore.addNotification(
+                  'success',
+                  'Transaction completed successfully'
+                );
               }
-              
+
               return { hash: currentHash };
             } catch (error) {
               console.error('🔴 Transaction failed:', error);
-              
+
               // Use the same error handling pattern as useActions
               if (!isUserAbortError(error)) {
-                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+                uiStore.addNotification(
+                  'error',
+                  getUserFacingErrorMessage(error)
+                );
               }
-              
+
               throw error;
             }
           },
@@ -129,22 +135,28 @@ function renderBitteWidget() {
             }
 
             try {
+              // Use the same getSigner pattern as the rest of the project
               const signer = auth.value.provider.getSigner();
               console.log('🔍 Signing message:', message);
-              
+
               const signature = await signer.signMessage(message);
-              
+
               currentSignature = signature;
-              console.log('🟢 Message signature:', { signature: currentSignature });
-              
+              console.log('🟢 Message signature:', {
+                signature: currentSignature
+              });
+
               return signature;
             } catch (error) {
               console.error('🔴 Message signing failed:', error);
-              
+
               if (!isUserAbortError(error)) {
-                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+                uiStore.addNotification(
+                  'error',
+                  getUserFacingErrorMessage(error)
+                );
               }
-              
+
               throw error;
             }
           },
@@ -154,9 +166,12 @@ function renderBitteWidget() {
             }
 
             try {
+              // Use the same getSigner pattern as the rest of the project
               const signer = auth.value.provider.getSigner();
               const parsedTypedData =
-                typeof typedData === 'string' ? JSON.parse(typedData) : typedData;
+                typeof typedData === 'string'
+                  ? JSON.parse(typedData)
+                  : typedData;
 
               console.log('🔍 Signing typed data:', parsedTypedData);
 
@@ -170,16 +185,21 @@ function renderBitteWidget() {
               );
 
               currentSignature = signature;
-              console.log('🟢 Typed data signature:', { signature: currentSignature });
-              
+              console.log('🟢 Typed data signature:', {
+                signature: currentSignature
+              });
+
               return signature;
             } catch (error) {
               console.error('🔴 Typed data signing failed:', error);
-              
+
               if (!isUserAbortError(error)) {
-                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+                uiStore.addNotification(
+                  'error',
+                  getUserFacingErrorMessage(error)
+                );
               }
-              
+
               throw error;
             }
           },
@@ -197,8 +217,11 @@ function renderBitteWidget() {
                     : parseInt(chainId);
 
               const encodedChainId = `0x${actualChainId.toString(16)}`;
-              console.log('🔍 Switching to chain:', { chainId: actualChainId, encoded: encodedChainId });
-              
+              console.log('🔍 Switching to chain:', {
+                chainId: actualChainId,
+                encoded: encodedChainId
+              });
+
               await auth.value.provider.provider.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: encodedChainId }]
@@ -208,11 +231,14 @@ function renderBitteWidget() {
               return true;
             } catch (error) {
               console.error('🔴 Chain switch failed:', error);
-              
+
               if (!isUserAbortError(error)) {
-                uiStore.addNotification('error', getUserFacingErrorMessage(error));
+                uiStore.addNotification(
+                  'error',
+                  getUserFacingErrorMessage(error)
+                );
               }
-              
+
               throw error;
             }
           }
