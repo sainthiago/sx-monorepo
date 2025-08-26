@@ -26,7 +26,7 @@ export default defineConfig({
       '/api/chat': {
         target: 'https://ai-runtime-446257178793.europe-west1.run.app',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api\/bitte/, ''),
+        rewrite: path => path.replace(/^\/api\/chat/, '/chat'),
         configure: proxy => {
           proxy.on('proxyReq', (proxyReq, req) => {
             // Add authentication header

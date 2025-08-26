@@ -99,6 +99,7 @@
     "turndown": "^7.2.0",
     "unplugin-auto-import": "^0.16.6",
     "util": "^0.12.5",
+    "viem": "^2.35.1",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
     "vue-tippy": "^6.4.1",

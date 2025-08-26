@@ -21210,7 +21210,7 @@ viem@>=2.23, viem@>=2.23.0:
     ox "0.6.7"
     ws "8.18.0"
 
-viem@>=2.29.0, viem@^2.1.1, viem@^2.22.8, viem@^2.27.2, viem@^2.29.3, viem@^2.31.7:
+viem@>=2.29.0, viem@^2.1.1, viem@^2.22.8, viem@^2.27.2, viem@^2.29.3, viem@^2.31.7, viem@^2.35.1:
   version "2.35.1"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.35.1.tgz#8555c6cbe645048d172e162d50b8f6d91f63d64e"
   integrity sha512-BVGrI2xzMa+cWaUhhMuq+RV6t/8aHN08QAPG07OMFb3PBWc0AYubRMyIuxMKncFe8lJdxfRWNRYv1agoM/xSlQ==
